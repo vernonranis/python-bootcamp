@@ -1,103 +1,70 @@
 #Step 1 
 from random import choice
-from os import system
+from os import system, execl
+from sys import executable, argv
+from hangman_art import stages, logo
+from hangman_words import word_list
 
-stages = ['''
-  +---+
-  |   |
-  O   |
- /|\  |
- / \  |
-      |
-=========
-''', '''
-  +---+
-  |   |
-  O   |
- /|\  |
- /    |
-      |
-=========
-''', '''
-  +---+
-  |   |
-  O   |
- /|\  |
-      |
-      |
-=========
-''', '''
-  +---+
-  |   |
-  O   |
- /|   |
-      |
-      |
-=========''', '''
-  +---+
-  |   |
-  O   |
-  |   |
-      |
-      |
-=========
-''', '''
-  +---+
-  |   |
-  O   |
-      |
-      |
-      |
-=========
-''']
 
-word_list = ["aardvark", "baboon", "camel"]
+#TODO-1: - Update the word list to use the 'word_list' from hangman_words.py
+#Delete this line: word_list = ["ardvark", "baboon", "camel"]
 chosen_word = choice(word_list)
 guess = ""
 display = []
 end_of_game = False
-
-#TODO-1: - Create a variable called 'lives' to keep track of the number of lives left. 
-#Set 'lives' to equal 6.
-lives = len(stages)
-
-#Testing code
+lives = len(stages) - 1
+guessed = set()
+try_again = ""
 
 for word in chosen_word:
     display.append("_")
 
+#TODO-3: - Import the logo from hangman_art.py and print it at the start of the game.
+system("clear")
 while not end_of_game:
-    print(f'Pssst, the solution is {chosen_word}.')
     while len(guess) == 0:
+        system("clear")
+        print(f"{logo}\nLives: {lives}\n{stages[lives]}")
+        print(display)
+        print(f'Pssst, the solution is {chosen_word}.')
         guess = input("Guess a letter: ").lower()
+        #TODO-4: - If the user has entered a letter they've already guessed, print the letter and let them know.
         if len(guess) > 1 or len(guess) < 1:
             guess = ""
         else:
             pass
+
     # check guessed letter
-    for index in range(len(chosen_word)):
-        if guess in chosen_word[index]:
+    if guess in guessed:
+        input(f"You have already entered the letter {guess}! Try again!")
+    else:
+        for index in range(len(chosen_word)):
+            if guess in chosen_word[index]:
+                system("clear")
+                display[index] = guess
+                print(logo)
+                print(f"Lives: {lives}\n{stages[lives]}")
+                print(display)
+            else:
+                pass
+        
+        if guess not in display:
+            lives -= 1
             system("clear")
-            display[index] = guess
-            print(f"Lives: {lives} {stages[lives]}")
+            #TODO-2: - Import the stages from hangman_art.py and make this error go away
+            print(logo)
+            print(f"Lives: {lives}\n{stages[lives]}")
             print(display)
-    #TODO-2: - If guess is not a letter in the chosen_word,
-    #Then reduce 'lives' by 1. 
-    #If lives goes down to 0 then the game should stop and it should print "You lose."
 
-        else:
-            pass
-    
-    if guess not in display:
-        lives -= 1
-        system("clear")
-        print(f"Lives: {lives} {stages[lives]}")
-        print(display)
-
+    guessed.add(guess)
     guess = ""
     if "_" not in display:
-        end_of_game = True
-        print("You Win")
+        try_again = input("You Win! Do you want to try again? (y/n): ").lower()
+        if try_again == "n":
+            print("Thank you for playing!")
+            end_of_game = True
+        elif try_again == "y":
+            execl(executable, executable, *argv)
     if lives == 0:
         end_of_game = True
-        print("You Lose")
+        print("Game Over! You Lose")
